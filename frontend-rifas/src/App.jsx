@@ -314,117 +314,255 @@ function RaffleDetail({ raffle, onBack, onSuccess }) {
 
   return (
     <div className="py-2">
-      <button onClick={onBack} className="btn btn-link link-secondary p-0 text-white text-decoration-none small fw-bold mb-3">
+      <button
+        onClick={onBack}
+        className="btn btn-link link-secondary p-0 text-white text-decoration-none small fw-bold mb-3"
+      >
         ← Volver a Sorteos
       </button>
 
-      <div className="card text-light border-secondary border-opacity-25 p-3 mb-4 shadow-sm" style={{ backgroundColor: '#111827', borderRadius: '1rem' }}>
+      <div
+        className="card text-light border-secondary border-opacity-25 p-3 mb-4 shadow-sm"
+        style={{ backgroundColor: "#111827", borderRadius: "1rem" }}
+      >
         <div className="d-flex justify-content-between align-items-center">
           <div className="d-flex align-items-center gap-3">
             <span className="fs-3 p-2 bg-dark rounded-3">{raffle.imagen}</span>
             <div>
               <h2 className="h6 m-0 fw-bold text-white">{raffle.titulo}</h2>
-              <p className="text-secondary small m-0 mt-0.5">{raffle.boletosDisponibles} disponibles</p>
+              <p className="text-secondary small m-0 mt-0.5">
+                {raffle.boletosDisponibles} disponibles
+              </p>
             </div>
           </div>
-          <span className="h5 font-weight-black text-success m-0">${raffle.precioBoleto.toFixed(2)} MXN</span>
+          <span className="h5 font-weight-black text-success m-0">
+            ${raffle.precioBoleto.toFixed(2)} MXN
+          </span>
         </div>
       </div>
 
       <div className="mb-3">
-        <h3 className="text-primary uppercase fw-bold tracking-wider small m-0" style={{ fontSize: '11px' }}>PASO 1: ELIGE UN BOLETO</h3>
-        <p className="text-secondary small mt-1">Selecciona cualquiera de las casillas verdes. Las grises ya pertenecen a otro participante.</p>
+        <h3
+          className="text-primary uppercase fw-bold tracking-wider small m-0"
+          style={{ fontSize: "11px" }}
+        >
+          PASO 1: ELIGE UN BOLETO
+        </h3>
+        <p className="text-secondary small mt-1">
+          Selecciona cualquiera de las casillas verdes. Las grises ya pertenecen
+          a otro participante.
+        </p>
       </div>
 
-      <div className="card text-light border-secondary border-opacity-25 p-4 shadow-lg mb-4" style={{ backgroundColor: '#111827', borderRadius: '1rem' }}>
-        <div className="row g-2 overflow-auto" style={{ maxHeight: '320px' }}>
-          {Array.from({ length: 100 }).map((_, i) => {
-            const isSold = soldTickets.includes(i);
+      <div
+        className="card text-light border-secondary border-opacity-25 p-4 shadow-lg mb-4"
+        style={{ backgroundColor: "#111827", borderRadius: "1rem" }}
+      >
+        <div className="row g-2 overflow-auto" style={{ maxHeight: "320px" }}>
+          {Array.from({ length: raffle?.totalBoletos || 100 }).map((_, i) => {
+            const isSold = soldTickets.some(b => b.numeroBoleto === i);
             const isSelected = selectedNum === i;
-            
+
             let btnStyle = {
-              height: '38px',
-              borderRadius: '0.5rem',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              border: '1px solid transparent',
-              transition: 'all 0.15s ease-in-out'
+              height: "38px",
+              borderRadius: "0.5rem",
+              fontSize: "12px",
+              fontWeight: "bold",
+              // 👇 REMPLAZAMOS EL SHORTHAND POR ESTAS TRES PROPIEDADES INDIVIDUALES
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: "transparent",
+              transition: "all 0.15s ease-in-out",
             };
 
-            let btnClass = "col-2 col-sm-1 d-flex justify-content-center align-items-center btn ";
+            let btnClass =
+              "col-2 col-sm-1 d-flex justify-content-center align-items-center btn ";
 
             if (isSold) {
               btnClass += "btn-dark opacity-20 disabled";
-              btnStyle.color = '#4b5563';
-              btnStyle.backgroundColor = '#1f2937';
+              btnStyle.color = "#4b5563";
+              btnStyle.backgroundColor = "#1f2937";
             } else if (isSelected) {
               btnClass += "btn-warning text-dark fw-bold shadow";
             } else {
-              btnClass += "btn-outline-success text-success bg-success bg-opacity-10";
-              btnStyle.borderColor = 'rgba(16, 185, 129, 0.2)';
+              btnClass +=
+                "btn-outline-success text-success bg-success bg-opacity-10";
+              // 👇 AHORA SÍ, MODIFICAR EL BORDER COLOR ES SEGURO PORQUE NO HAY SHORTHAND
+              btnStyle.borderColor = "rgba(16, 185, 129, 0.2)";
             }
 
             return (
-              <button key={i} disabled={isSold} onClick={() => setSelectedNum(isSelected ? null : i)} className={btnClass} style={btnStyle}>
-                {i.toString().padStart(2, '0')}
+              <button
+                key={i}
+                disabled={isSold}
+                onClick={() => setSelectedNum(isSelected ? null : i)}
+                className={btnClass}
+                style={btnStyle}
+              >
+                {i.toString().padStart(2, "0")}
               </button>
             );
-          })}
+          })}{" "}
         </div>
 
-        {errorMsg && <p className="text-danger small fw-bold mt-3 text-center">🚨 {errorMsg}</p>}
+        {errorMsg && (
+          <p className="text-danger small fw-bold mt-3 text-center">
+            🚨 {errorMsg}
+          </p>
+        )}
 
         <div className="mt-4 pt-3 border-top border-secondary border-opacity-25">
           <button
             disabled={selectedNum === null || loadingAction}
             onClick={user ? manejarCompraDirecta : () => setShowModal(true)}
-            className={`btn w-100 py-2.5 fw-bold small ${selectedNum !== null ? 'btn-success text-dark' : 'btn-secondary text-muted'}`}
-            style={{ borderRadius: '0.75rem' }}
+            className={`btn w-100 py-2.5 fw-bold small ${selectedNum !== null ? "btn-success text-dark" : "btn-secondary text-muted"}`}
+            style={{ borderRadius: "0.75rem" }}
           >
-            {loadingAction ? 'Procesando transacción...' : selectedNum !== null ? `Comprar Boleto #${selectedNum.toString().padStart(2, '0')}` : 'Selecciona un número arriba'}
+            {loadingAction
+              ? "Procesando transacción..."
+              : selectedNum !== null
+                ? `Comprar Boleto #${selectedNum.toString().padStart(2, "0")}`
+                : "Selecciona un número arriba"}
           </button>
         </div>
       </div>
 
       {showModal && (
-        <div className="modal d-block" style={{ backgroundColor: 'rgba(8, 11, 19, 0.85)', backdropFilter: 'blur(4px)' }} tabIndex="-1">
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '360px' }}>
-            <div className="modal-content text-light border-secondary border-opacity-25 p-3 shadow-2xl" style={{ backgroundColor: '#101626', borderRadius: '1.5rem' }}>
+        <div
+          className="modal d-block"
+          style={{
+            backgroundColor: "rgba(8, 11, 19, 0.85)",
+            backdropFilter: "blur(4px)",
+          }}
+          tabIndex="-1"
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            style={{ maxWidth: "360px" }}
+          >
+            <div
+              className="modal-content text-light border-secondary border-opacity-25 p-3 shadow-2xl"
+              style={{ backgroundColor: "#101626", borderRadius: "1.5rem" }}
+            >
               <div className="modal-header border-0 p-2 d-flex justify-content-between align-items-center">
-                <h3 className="modal-title h6 fw-bold text-white">Compra Express en un Clic</h3>
-                <button type="button" onClick={() => setShowModal(false)} className="btn-close btn-close-white shadow-none" aria-label="Close" style={{ fontSize: '12px' }}></button>
+                <h3 className="modal-title h6 fw-bold text-white">
+                  Compra Express en un Clic
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="btn-close btn-close-white shadow-none"
+                  aria-label="Close"
+                  style={{ fontSize: "12px" }}
+                ></button>
               </div>
-              
-              <div className="modal-body p-2">
-                <p className="text-secondary small mb-3">Apartarás de forma inmediata el boleto <span className="text-warning fw-bold">#{selectedNum?.toString().padStart(2, '0')}</span> en Neon.</p>
 
-                <div className="row g-0 p-1 bg-dark rounded-3 border border-secondary border-opacity-25 mb-3 text-center" style={{ fontSize: '12px' }}>
+              <div className="modal-body p-2">
+                <p className="text-secondary small mb-3">
+                  Apartarás de forma inmediata el boleto{" "}
+                  <span className="text-warning fw-bold">
+                    #{selectedNum?.toString().padStart(2, "0")}
+                  </span>{" "}
+                  en Neon.
+                </p>
+
+                <div
+                  className="row g-0 p-1 bg-dark rounded-3 border border-secondary border-opacity-25 mb-3 text-center"
+                  style={{ fontSize: "12px" }}
+                >
                   <div className="col-6">
-                    <button onClick={() => setModalMode('register')} className={`btn btn-sm w-100 fw-bold border-0 text-white ${modalMode === 'register' ? 'btn-primary' : 'btn-link text-decoration-none text-secondary'}`} style={{ borderRadius: '0.5rem' }}>Registrarme</button>
+                    <button
+                      onClick={() => setModalMode("register")}
+                      className={`btn btn-sm w-100 fw-bold border-0 text-white ${modalMode === "register" ? "btn-primary" : "btn-link text-decoration-none text-secondary"}`}
+                      style={{ borderRadius: "0.5rem" }}
+                    >
+                      Registrarme
+                    </button>
                   </div>
                   <div className="col-6">
-                    <button onClick={() => setModalMode('login')} className={`btn btn-sm w-100 fw-bold border-0 text-white ${modalMode === 'login' ? 'btn-primary' : 'btn-link text-decoration-none text-secondary'}`} style={{ borderRadius: '0.5rem' }}>Tengo cuenta</button>
+                    <button
+                      onClick={() => setModalMode("login")}
+                      className={`btn btn-sm w-100 fw-bold border-0 text-white ${modalMode === "login" ? "btn-primary" : "btn-link text-decoration-none text-secondary"}`}
+                      style={{ borderRadius: "0.5rem" }}
+                    >
+                      Tengo cuenta
+                    </button>
                   </div>
                 </div>
 
-                <form onSubmit={ejecutarAutenticacionExpress} className="d-flex flex-column gap-3">
-                  {modalMode === 'register' && (
+                <form
+                  onSubmit={ejecutarAutenticacionExpress}
+                  className="d-flex flex-column gap-3"
+                >
+                  {modalMode === "register" && (
                     <div>
-                      <label className="text-secondary uppercase tracking-wider d-block mb-1" style={{ fontSize: '9px' }}>Nombre Completo</label>
-                      <input name="nombre" required type="text" placeholder="Alonso Ortiz" className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white text-xs shadow-none" style={{ borderRadius: '0.5rem', backgroundColor: '#0b0f19 !important' }} />
+                      <label
+                        className="text-secondary uppercase tracking-wider d-block mb-1"
+                        style={{ fontSize: "9px" }}
+                      >
+                        Nombre Completo
+                      </label>
+                      <input
+                        name="nombre"
+                        required
+                        type="text"
+                        placeholder="Alonso Ortiz"
+                        className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white text-xs shadow-none"
+                        style={{
+                          borderRadius: "0.5rem",
+                          backgroundColor: "#0b0f19 !important",
+                        }}
+                      />
                     </div>
                   )}
                   <div>
-                    <label className="text-secondary uppercase tracking-wider d-block mb-1" style={{ fontSize: '9px' }}>Correo Electrónico</label>
-                    <input name="email" required type="email" placeholder="alonso@example.com" className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white text-xs shadow-none" style={{ borderRadius: '0.5rem', backgroundColor: '#0b0f19 !important' }} />
+                    <label
+                      className="text-secondary uppercase tracking-wider d-block mb-1"
+                      style={{ fontSize: "9px" }}
+                    >
+                      Correo Electrónico
+                    </label>
+                    <input
+                      name="email"
+                      required
+                      type="email"
+                      placeholder="alonso@example.com"
+                      className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white text-xs shadow-none"
+                      style={{
+                        borderRadius: "0.5rem",
+                        backgroundColor: "#0b0f19 !important",
+                      }}
+                    />
                   </div>
                   <div>
-                    <label className="text-secondary uppercase tracking-wider d-block mb-1" style={{ fontSize: '9px' }}>Contraseña</label>
-                    <input name="password" required type="password" placeholder="••••••••" className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white text-xs shadow-none" style={{ borderRadius: '0.5rem', backgroundColor: '#0b0f19 !important' }} />
+                    <label
+                      className="text-secondary uppercase tracking-wider d-block mb-1"
+                      style={{ fontSize: "9px" }}
+                    >
+                      Contraseña
+                    </label>
+                    <input
+                      name="password"
+                      required
+                      type="password"
+                      placeholder="••••••••"
+                      className="form-control form-control-sm bg-dark border-secondary border-opacity-50 text-white text-xs shadow-none"
+                      style={{
+                        borderRadius: "0.5rem",
+                        backgroundColor: "#0b0f19 !important",
+                      }}
+                    />
                   </div>
 
-                  <button type="submit" disabled={loadingAction} className="btn btn-success w-100 py-2 text-dark fw-bold mt-2" style={{ borderRadius: '0.5rem', fontSize: '13px' }}>
-                    {loadingAction ? 'Procesando...' : 'Confirmar y Apartar Boleto'}
+                  <button
+                    type="submit"
+                    disabled={loadingAction}
+                    className="btn btn-success w-100 py-2 text-dark fw-bold mt-2"
+                    style={{ borderRadius: "0.5rem", fontSize: "13px" }}
+                  >
+                    {loadingAction
+                      ? "Procesando..."
+                      : "Confirmar y Apartar Boleto"}
                   </button>
                 </form>
               </div>
